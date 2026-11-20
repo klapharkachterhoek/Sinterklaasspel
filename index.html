@@ -716,9 +716,17 @@ document.addEventListener("keydown", (e) => {
 $("gooiknop").addEventListener("click", (e) => { e.currentTarget.blur(); gooi(); });
 $("scene").addEventListener("click", gooi);
 $("startknop").addEventListener("click", (e) => { e.currentTarget.blur(); spel.status === "loopt" ? pauzeer() : start(); ac(); });
+/* Bevestigen zonder pop-up: eerste klik vraagt "zeker?", tweede klik voert uit */
+function bevestig(knop, vraag, actie) {
+  if (knop.dataset.bevestig === "1") {
+    clearTimeout(knop._t); knop.textContent = knop.dataset.label; delete knop.dataset.bevestig; actie(); return;
+  }
+  knop.dataset.label = knop.textContent; knop.dataset.bevestig = "1"; knop.textContent = vraag;
+  knop._t = setTimeout(() => { knop.textContent = knop.dataset.label; delete knop.dataset.bevestig; }, 3500);
+}
 $("nieuwknop").addEventListener("click", (e) => {
-  e.currentTarget.blur();
-  if (spel.status === "klaar" || confirm("Een nieuw spel starten? De tijd gaat terug en alle uitgezette taken doen weer mee.")) nieuwSpel();
+  const knop = e.currentTarget; knop.blur();
+  if (spel.status === "klaar") nieuwSpel(); else bevestig(knop, "Zeker? Klik nog eens", nieuwSpel);
 });
 $("eindnieuw").addEventListener("click", nieuwSpel);
 $("eindsluit").addEventListener("click", () => $("einde").classList.remove("open"));
@@ -844,11 +852,10 @@ $("c-importbestand").addEventListener("change", async (e) => {
   } catch (err) { $("c-status").textContent = "Kon bestand niet lezen: " + err.message; }
   e.target.value = "";
 });
-$("c-standaard").addEventListener("click", () => {
-  if (!confirm("Alle instellingen en taken terugzetten naar de standaard?")) return;
+$("c-standaard").addEventListener("click", (e) => bevestig(e.currentTarget, "Zeker? Klik nog eens", () => {
   concept = kopie(STANDAARD); vulAlgemeen(); tekenTaken();
   $("c-status").textContent = "Standaard teruggezet — klik op Opslaan om te bevestigen";
-});
+}));
 $("c-annuleer").addEventListener("click", sluitConfig);
 $("c-opslaan").addEventListener("click", async () => {
   if (!$("tab-algemeen").hidden) leesAlgemeen();
