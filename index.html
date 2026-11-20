@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sinterklaas Dobbelspel</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --rood: #a3131b;
+    --donkerrood: #4a0509;
+    --goud: #e8b84a;
+    --goudlicht: #f7dc8f;
+    --creme: #fff6e3;
+    --bruin: #7a4a23;
+    --groen: #2f7d4a;
+    --dobbel: clamp(120px, 22vmin, 240px);
+    font-family: "Georgia", "Cambria", "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    color: var(--creme);
+    background:
+      radial-gradient(ellipse at 50% 35%, #b51a22 0%, #7d0c12 45%, var(--donkerrood) 100%);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* Gouden lijst rondom */
+  body::before {
+    content: ""; position: fixed; inset: 10px; pointer-events: none; z-index: 1;
+    border: 3px solid var(--goud); border-radius: 18px;
+    box-shadow: inset 0 0 0 6px rgba(232,184,74,.18), 0 0 30px rgba(0,0,0,.4);
+  }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- Pepernotenregen ---------- */
+  #pepernoten { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .pepernoot {
+    position: absolute; top: -40px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #c98a4b, #8a5426 60%, #5e3515);
+    box-shadow: inset -2px -3px 4px rgba(0,0,0,.35);
+    opacity: .55; animation: vallen linear infinite;
+  }
+  @keyframes vallen { to { transform: translateY(110vh) rotate(540deg); } }
+
+  /* ---------- Lay-out ---------- */
+  #app { position: relative; z-index: 2; height: 100%; display: grid;
+    grid-template-rows: auto 1fr auto; padding: 22px 28px 20px; gap: 12px; }
+  header { display: flex; align-items: center; gap: 18px; }
+  header .mijter { width: clamp(40px, 6vmin, 70px); flex: none; filter: drop-shadow(0 3px 4px rgba(0,0,0,.4)); }
+  #titel { font-size: clamp(22px, 3.6vmin, 44px); margin: 0; color: var(--goudlicht);
+    text-shadow: 0 2px 0 #5a0a0e, 0 4px 12px rgba(0,0,0,.5); letter-spacing: .5px; flex: 1; }
+  .knoppen { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .knop {
+    background: linear-gradient(#f3d27a, #c8902c); color: #4a1a00; border: 2px solid #fff1c1;
+    border-radius: 999px; padding: 8px 16px; font-size: clamp(13px, 1.7vmin, 18px); font-weight: bold;
+    box-shadow: 0 3px 0 #7a4f10, 0 6px 10px rgba(0,0,0,.3);
+  }
+  .knop:active { transform: translateY(2px); box-shadow: 0 1px 0 #7a4f10; }
+  .knop.rond { padding: 8px 12px; }
+  .knop.secundair { background: linear-gradient(#fff6e3, #e2cfa6); }
+  .knop.gevaar { background: linear-gradient(#ff8a80, #c62828); color: #fff; border-color: #ffd0cb; box-shadow: 0 3px 0 #6d1010; }
+
+  /* ---------- Timer ---------- */
+  #timerblok { text-align: right; min-width: clamp(140px, 18vmin, 230px); }
+  #timer { font-size: clamp(34px, 6.5vmin, 80px); font-weight: bold; font-variant-numeric: tabular-nums;
+    color: var(--creme); text-shadow: 0 3px 10px rgba(0,0,0,.5); line-height: 1; }
+  #timerbalk { height: 8px; border-radius: 6px; background: rgba(0,0,0,.35); margin-top: 6px; overflow: hidden; border: 1px solid rgba(232,184,74,.5); }
+  #timerbalk div { height: 100%; width: 100%; background: linear-gradient(90deg, var(--goud), var(--goudlicht)); transition: width .3s linear; }
+  #timerstatus { font-size: clamp(12px, 1.6vmin, 16px); opacity: .85; margin-top: 4px; }
+  #timer.laatste { color: #ffd54f; animation: knipper 1s steps(2) infinite; }
+  @keyframes knipper { 50% { opacity: .35; } }
+
+  /* ---------- Speelveld ---------- */
+  main { display: grid; grid-template-columns: 1fr 1.2fr; gap: 28px; align-items: center; min-height: 0; }
+  #dobbelzone { display: flex; flex-direction: column; align-items: center; gap: clamp(20px, 5vmin, 56px); }
+  .scene { width: var(--dobbel); height: var(--dobbel); perspective: 900px; cursor: pointer; }
+  .scene.springt { animation: springen .45s ease-in-out infinite; }
+  @keyframes springen { 50% { transform: translateY(calc(var(--dobbel) * -0.18)); } }
+  .kubus { width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+    transition: transform .4s cubic-bezier(.3,.7,.4,1); transform: rotateX(-20deg) rotateY(25deg); }
+  .vlak {
+    position: absolute; inset: 0; border-radius: 18%;
+    background: radial-gradient(circle at 30% 25%, #ffffff, #fbeedd 60%, #ead6b5);
+    border: 3px solid #d9b77a;
+    display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 14%;
+    box-shadow: inset 0 0 18px rgba(122,74,35,.35);
+  }
+  .vlak .oog { width: 70%; height: 70%; margin: auto; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e0353d, #8d0c12); box-shadow: inset 0 2px 3px rgba(0,0,0,.4); visibility: hidden; }
+  .vlak .oog.aan { visibility: visible; }
+  .v1 { transform: rotateY(0deg)    translateZ(calc(var(--dobbel) / 2)); }
+  .v6 { transform: rotateY(180deg)  translateZ(calc(var(--dobbel) / 2)); }
+  .v3 { transform: rotateY(90deg)   translateZ(calc(var(--dobbel) / 2)); }
+  .v4 { transform: rotateY(-90deg)  translateZ(calc(var(--dobbel) / 2)); }
+  .v2 { transform: rotateX(90deg)   translateZ(calc(var(--dobbel) / 2)); }
+  .v5 { transform: rotateX(-90deg)  translateZ(calc(var(--dobbel) / 2)); }
+  .schaduw { width: calc(var(--dobbel) * .9); height: 18px; margin-top: -10px; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0,0,0,.45), transparent 70%); }
+
+  #gooiknop { font-size: clamp(26px, 5vmin, 60px); padding: .35em 1.4em; }
+  #gooiknop:disabled { filter: grayscale(.7) brightness(.8); cursor: not-allowed; }
+  #hint { font-size: clamp(12px, 1.6vmin, 16px); opacity: .8; text-align: center; }
+
+  /* ---------- Resultaatkaart (perkament) ---------- */
+  #kaart {
+    position: relative; color: #3b1d06; border-radius: 14px; min-height: 48vmin;
+    padding: clamp(20px, 4vmin, 48px);
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,.6), transparent 40%),
+      linear-gradient(135deg, #fbf0d4, #ecd7a6 55%, #e1c58a);
+    border: 3px solid var(--goud);
+    box-shadow: 0 12px 30px rgba(0,0,0,.45), inset 0 0 40px rgba(122,74,35,.35);
+    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  }
+  #kaart::after { content: "🎁"; position: absolute; right: 14px; bottom: 6px; font-size: 26px; opacity: .35; }
+  #kaartkop { font-size: clamp(14px, 2vmin, 22px); letter-spacing: 2px; text-transform: uppercase; color: #8a1b16; font-weight: bold; }
+  #kaartemoji { font-size: clamp(56px, 13vmin, 150px); line-height: 1.1; margin: 1vmin 0; }
+  #kaarttekst { font-size: clamp(24px, 5vmin, 60px); font-weight: bold; line-height: 1.15; }
+  #kaartsub { font-size: clamp(14px, 2.1vmin, 22px); margin-top: 1.5vmin; opacity: .85; }
+  #kaart.verschijn { animation: verschijn .55s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes verschijn { from { transform: scale(.6) rotate(-4deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  #uitzetten { margin-top: 2.5vmin; display: none; align-items: center; gap: 12px;
+    background: rgba(255,255,255,.55); border: 2px dashed #b08a4a; border-radius: 10px;
+    padding: 10px 16px; font-size: clamp(14px, 2vmin, 22px); cursor: pointer; }
+  #uitzetten input { width: clamp(20px, 3vmin, 32px); height: clamp(20px, 3vmin, 32px); accent-color: #a3131b; cursor: pointer; }
+
+  /* ---------- Takenstrook ---------- */
+  footer { min-height: 0; }
+  #strooktitel { font-size: clamp(12px, 1.5vmin, 15px); opacity: .8; margin-bottom: 6px; }
+  #strook { display: flex; gap: 8px; flex-wrap: wrap; max-height: 18vh; overflow: auto; }
+  .chip { display: flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 12px 5px 6px;
+    font-size: clamp(12px, 1.6vmin, 16px); border: 1px solid rgba(232,184,74,.7);
+    background: rgba(0,0,0,.25); color: var(--creme); cursor: pointer; }
+  .chip .ogen { background: var(--creme); color: var(--rood); border-radius: 50%; width: 1.7em; height: 1.7em;
+    display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
+  .chip .status { font-size: .8em; opacity: .85; font-style: italic; }
+  .chip.uit { text-decoration: line-through; opacity: .45; }
+  .chip.wacht, .chip.verlopen { opacity: .55; border-style: dashed; }
+  .chip.laatst { background: rgba(232,184,74,.35); }
+
+  /* ---------- Overlays ---------- */
+  .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(30,2,4,.82); display: none;
+    align-items: center; justify-content: center; padding: 20px; }
+  .overlay.open { display: flex; }
+  #eindbericht { text-align: center; }
+  #eindbericht h2 { font-size: clamp(36px, 8vmin, 96px); color: var(--goudlicht); margin: 0 0 10px; }
+  #eindbericht p { font-size: clamp(18px, 3vmin, 34px); margin: 0 0 24px; }
+  #melding { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 60;
+    background: #fff6e3; color: #4a1a00; padding: 10px 20px; border-radius: 999px; font-weight: bold;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4); opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #melding.zicht { opacity: 1; }
+
+  /* ---------- Configscherm ---------- */
+  #config .paneel { background: #fbf3df; color: #2c1606; width: min(1100px, 100%); max-height: 100%;
+    border-radius: 14px; border: 3px solid var(--goud); display: flex; flex-direction: column; overflow: hidden;
+    font-family: system-ui, "Segoe UI", Ubuntu, sans-serif; user-select: text; -webkit-user-select: text; }
+  #config .kop { background: var(--rood); color: var(--goudlicht); padding: 12px 18px; display: flex; align-items: center; gap: 12px; }
+  #config .kop h2 { margin: 0; font-family: Georgia, serif; flex: 1; font-size: 22px; }
+  .tabs { display: flex; gap: 4px; padding: 10px 14px 0; background: #f0e2bf; }
+  .tab { border: 1px solid #c9a96a; border-bottom: none; background: #e7d3a5; padding: 8px 16px; border-radius: 8px 8px 0 0; font-size: 15px; }
+  .tab.actief { background: #fbf3df; font-weight: bold; }
+  .tabinhoud { padding: 16px 18px; overflow: auto; flex: 1; }
+  .tabinhoud[hidden] { display: none; }
+  .veld { display: grid; grid-template-columns: 260px 1fr; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .veld label { font-weight: 600; }
+  .veld small { display: block; font-weight: normal; opacity: .7; }
+  #config input[type=text], #config input[type=number], #config select, #config textarea {
+    font: inherit; padding: 6px 8px; border: 1px solid #b99a5c; border-radius: 6px; background: #fff; color: #2c1606; }
+  #config input[type=number] { width: 90px; }
+  .toetslijst { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .toets { background: #fff; border: 1px solid #b99a5c; border-radius: 6px; padding: 4px 8px; font-family: monospace; }
+  .toets button { border: none; background: none; color: #a3131b; font-weight: bold; padding: 0 0 0 6px; }
+  table.taken { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.taken th { text-align: left; background: #ead7a8; padding: 6px; position: sticky; top: -16px; z-index: 1; }
+  table.taken td { padding: 4px 6px; border-bottom: 1px solid #e3cf9e; vertical-align: middle; }
+  table.taken input[type=text].tekst { width: 100%; min-width: 220px; }
+  table.taken input.emoji { width: 56px; text-align: center; }
+  table.taken input[type=number] { width: 70px; }
+  table.taken select { width: 78px; }
+  .klein { font-size: 13px; opacity: .75; }
+  #jsonveld { width: 100%; min-height: 50vh; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  .voet { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 18px; background: #f0e2bf; border-top: 1px solid #d8bf86; align-items: center; }
+  .voet .vul { flex: 1; font-size: 13px; opacity: .8; }
+  .cknop { border: 1px solid #a07a35; background: #fff; color: #2c1606; border-radius: 8px; padding: 7px 14px; font-size: 14px; }
+  .cknop.hoofd { background: var(--rood); color: #fff; border-color: #5a0a0e; font-weight: bold; }
+  .cknop.rood { color: #a3131b; }
+
+  @media (max-width: 820px), (orientation: portrait) {
+    body { overflow: auto; }
+    #app { height: auto; min-height: 100%; }
+    main { grid-template-columns: 1fr; }
+    #kaart { min-height: 30vh; }
+    header { flex-wrap: wrap; }
+    .veld { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="pepernoten"></div>
+
+<div id="app">
+  <header>
+    <svg class="mijter" viewBox="0 0 64 80" aria-hidden="true">
+      <path d="M8 74 L8 30 Q8 8 32 2 Q56 8 56 30 L56 74 Z" fill="#c4161f" stroke="#e8b84a" stroke-width="3"/>
+      <path d="M8 62 H56 M32 4 V62" stroke="#e8b84a" stroke-width="4" fill="none"/>
+      <path d="M24 30 H40 M32 20 V44" stroke="#f7dc8f" stroke-width="5" stroke-linecap="round"/>
+      <rect x="6" y="62" width="52" height="14" rx="3" fill="#e8b84a"/>
+    </svg>
+    <h1 id="titel">Het Grote Sinterklaas Dobbelspel</h1>
+    <div class="knoppen">
+      <button class="knop" id="startknop" title="Start of pauzeer de speltijd">▶ Start</button>
+      <button class="knop secundair" id="nieuwknop" title="Nieuw spel: tijd terug en alle taken weer aan">↺ Nieuw spel</button>
+      <button class="knop secundair rond" id="schermknop" title="Volledig scherm">⛶</button>
+      <button class="knop secundair rond" id="configknop" title="Instellingen (F2)">⚙</button>
+    </div>
+    <div id="timerblok">
+      <div id="timer">15:00</div>
+      <div id="timerbalk"><div></div></div>
+      <div id="timerstatus">Klaar om te beginnen</div>
+    </div>
+  </header>
+
+  <main>
+    <section id="dobbelzone">
+      <div class="scene" id="scene" title="Klik om te gooien">
+        <div class="kubus" id="kubus"></div>
+      </div>
+      <div class="schaduw"></div>
+      <button class="knop" id="gooiknop">🎲 Gooi!</button>
+      <div id="hint"></div>
+    </section>
+
+    <section id="kaart">
+      <div id="kaartkop">Welkom, lieve mensen!</div>
+      <div id="kaartemoji">🎁</div>
+      <div id="kaarttekst">Wie gooit er als eerste?</div>
+      <div id="kaartsub">Druk op de knop of op de dobbelsteen</div>
+      <label id="uitzetten"><input type="checkbox" id="uitzetvink"> <span>Deze taak niet meer gebruiken in dit spel</span></label>
+    </section>
+  </main>
+
+  <footer>
+    <div id="strooktitel">Taken in dit spel — tik op een taak om hem uit of weer aan te zetten</div>
+    <div id="strook"></div>
+  </footer>
+</div>
+
+<!-- Einde van het spel -->
+<div class="overlay" id="einde">
+  <div id="eindbericht">
+    <h2>⏰ De tijd is om!</h2>
+    <p>Sinterklaas bedankt iedereen voor het meespelen.<br>Veel plezier met jullie cadeaus!</p>
+    <button class="knop" id="eindnieuw">↺ Nieuw spel</button>
+    <button class="knop secundair" id="eindsluit">Sluiten</button>
+  </div>
+</div>
+
+<!-- Instellingen -->
+<div class="overlay" id="config">
+  <div class="paneel">
+    <div class="kop"><h2>⚙ Instellingen</h2><span id="opslaglabel" class="klein"></span></div>
+    <div class="tabs">
+      <button class="tab actief" data-tab="algemeen">Algemeen</button>
+      <button class="tab" data-tab="taken">Taken</button>
+      <button class="tab" data-tab="json">JSON</button>
+    </div>
+
+    <div class="tabinhoud" id="tab-algemeen">
+      <div class="veld"><label for="c-titel">Titel</label><input type="text" id="c-titel"></div>
+      <div class="veld"><label for="c-spelduur">Totale speltijd<small>in minuten</small></label><input type="number" id="c-spelduur" min="1" max="240" step="1"></div>
+      <div class="veld"><label for="c-dobbelduur">Duur van het gooien<small>in seconden</small></label><input type="number" id="c-dobbelduur" min="0.5" max="30" step="0.5"></div>
+      <div class="veld"><label for="c-geentaak">Als een gegooid getal geen taak heeft</label>
+        <select id="c-geentaak">
+          <option value="opnieuw">Alleen getallen gooien die nu een taak hebben</option>
+          <option value="melding">Eerlijke dobbelsteen: toon "geen taak, volgende speler"</option>
+        </select></div>
+      <div class="veld"><label>Toetsen om te gooien<small>bijv. de knop van je photobooth</small></label>
+        <div class="toetslijst" id="c-toetsen"></div></div>
+      <div class="veld"><label for="c-gamepad">Gamepad / USB-knop<small>elke knop op een gamepad of arcade-encoder gooit</small></label><input type="checkbox" id="c-gamepad"></div>
+      <div class="veld"><label for="c-geluid">Geluid</label><input type="checkbox" id="c-geluid"></div>
+      <div class="veld"><label for="c-pepernoten">Pepernotenregen op de achtergrond</label><input type="checkbox" id="c-pepernoten"></div>
+    </div>
+
+    <div class="tabinhoud" id="tab-taken" hidden>
+      <p class="klein">Elke taak hoort bij een aantal ogen (1–6). Meerdere taken per getal mag: dan wordt er willekeurig één gekozen uit de taken die op dat moment beschikbaar zijn.
+        <b>Beschikbaar van/tot</b> is in minuten sinds de start van het spel; laat <i>tot</i> leeg voor "tot het einde".
+        <b>Actief</b> uit = de taak doet helemaal niet mee.</p>
+      <table class="taken">
+        <thead><tr><th>Ogen</th><th>Emoji</th><th>Taak</th><th>Van (min)</th><th>Tot (min)</th><th>Actief</th><th></th></tr></thead>
+        <tbody id="c-taken"></tbody>
+      </table>
+      <p><button class="cknop" id="c-taaktoevoegen">＋ Taak toevoegen</button></p>
+    </div>
+
+    <div class="tabinhoud" id="tab-json" hidden>
+      <p class="klein">De volledige instellingen als JSON. Pas aan en klik op <b>JSON toepassen</b>, daarna op <b>Opslaan</b>.</p>
+      <textarea id="jsonveld" spellcheck="false"></textarea>
+      <p><button class="cknop" id="c-jsontoepassen">JSON toepassen</button> <span id="jsonfout" class="klein" style="color:#a3131b"></span></p>
+    </div>
+
+    <div class="voet">
+      <button class="cknop" id="c-export">⬇ Exporteren</button>
+      <button class="cknop" id="c-import">⬆ Importeren</button>
+      <input type="file" id="c-importbestand" accept=".json,application/json" hidden>
+      <button class="cknop rood" id="c-standaard">Standaard herstellen</button>
+      <span class="vul" id="c-status"></span>
+      <button class="cknop" id="c-annuleer">Annuleren</button>
+      <button class="cknop hoofd" id="c-opslaan">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<div id="melding"></div>
+
+<script>
+"use strict";
+
+/* ===================== Standaardinstellingen ===================== */
+const STANDAARD = {
+  titel: "Het Grote Sinterklaas Dobbelspel",
+  spelduurMinuten: 15,
+  dobbelDuurSeconden: 5,
+  geenTaakGedrag: "opnieuw",
+  geluid: true,
+  pepernotenregen: true,
+  gamepad: true,
+  toetsen: [" ", "Enter"],
+  taken: [
+    { id: "t1", ogen: 1, emoji: "🎁", tekst: "Pak een cadeau van de stapel", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t2", ogen: 2, emoji: "⬅️", tekst: "Geef een cadeau door naar links", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t3", ogen: 3, emoji: "➡️", tekst: "Geef een cadeau door naar rechts", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t4", ogen: 4, emoji: "🔄", tekst: "Ruil een cadeau met iemand naar keuze", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t5", ogen: 5, emoji: "🎶", tekst: "Zing een couplet van een Sinterklaasliedje", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t6", ogen: 6, emoji: "🎁", tekst: "Pak een cadeau van de stapel en gooi nog een keer", beschikbaarVanaf: 0, beschikbaarTot: 5, actief: true },
+    { id: "t7", ogen: 6, emoji: "🕵️", tekst: "Steel een cadeau van een andere speler", beschikbaarVanaf: 5, beschikbaarTot: null, actief: true }
+  ]
+};
+const OPSLAGSLEUTEL = "sinterklaasspel.config.v1";
+
+/* ===================== Hulpjes ===================== */
+const $ = (id) => document.getElementById(id);
+const kopie = (o) => JSON.parse(JSON.stringify(o));
+const nieuwId = () => "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function getal(v, standaard, min, max) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return standaard;
+  return Math.min(max, Math.max(min, n));
+}
+function toetsNaam(k) {
+  return ({ " ": "Spatie", "Enter": "Enter", "ArrowUp": "↑", "ArrowDown": "↓", "ArrowLeft": "←", "ArrowRight": "→" })[k] || k;
+}
+function mmss(ms) {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+let meldingTimer = null;
+function melding(tekst) {
+  const m = $("melding");
+  m.textContent = tekst; m.classList.add("zicht");
+  clearTimeout(meldingTimer);
+  meldingTimer = setTimeout(() => m.classList.remove("zicht"), 2600);
+}
+
+/* Maak elke (geïmporteerde) config veilig en compleet */
+function schoon(c) {
+  c = (c && typeof c === "object") ? c : {};
+  const r = {
+    titel: typeof c.titel === "string" && c.titel.trim() ? c.titel.slice(0, 120) : STANDAARD.titel,
+    spelduurMinuten: getal(c.spelduurMinuten, STANDAARD.spelduurMinuten, 1, 240),
+    dobbelDuurSeconden: getal(c.dobbelDuurSeconden, STANDAARD.dobbelDuurSeconden, 0.5, 30),
+    geenTaakGedrag: c.geenTaakGedrag === "melding" ? "melding" : "opnieuw",
+    geluid: c.geluid !== false,
+    pepernotenregen: c.pepernotenregen !== false,
+    gamepad: c.gamepad !== false,
+    toetsen: Array.isArray(c.toetsen) ? c.toetsen.filter(k => typeof k === "string" && k.length).slice(0, 10) : kopie(STANDAARD.toetsen),
+    taken: []
+  };
+  const gezien = new Set();
+  for (const t of (Array.isArray(c.taken) ? c.taken : [])) {
+    if (!t || typeof t !== "object") continue;
+    let id = typeof t.id === "string" && t.id ? t.id : nieuwId();
+    if (gezien.has(id)) id = nieuwId();
+    gezien.add(id);
+    const tot = (t.beschikbaarTot === null || t.beschikbaarTot === "" || t.beschikbaarTot === undefined) ? null : getal(t.beschikbaarTot, null, 0, 999);
+    r.taken.push({
+      id,
+      ogen: Math.round(getal(t.ogen, 1, 1, 6)),
+      emoji: typeof t.emoji === "string" ? t.emoji.slice(0, 8) : "",
+      tekst: typeof t.tekst === "string" ? t.tekst.slice(0, 200) : "",
+      beschikbaarVanaf: getal(t.beschikbaarVanaf, 0, 0, 999),
+      beschikbaarTot: tot,
+      actief: t.actief !== false
+    });
+  }
+  return r;
+}
+
+/* ===================== Opslag: server (config.json) of browser ===================== */
+let config = schoon(STANDAARD);
+let serverModus = false;
+
+async function laadConfig() {
+  if (location.protocol.startsWith("http")) {
+    try {
+      const r = await fetch("api/config", { cache: "no-store" });
+      if (r.ok) { serverModus = true; return schoon(await r.json()); }
+    } catch (e) { /* geen server, val terug op browseropslag */ }
+  }
+  try {
+    const opgeslagen = localStorage.getItem(OPSLAGSLEUTEL);
+    if (opgeslagen) return schoon(JSON.parse(opgeslagen));
+  } catch (e) { /* localStorage niet beschikbaar */ }
+  return schoon(STANDAARD);
+}
+
+async function bewaarConfig(c) {
+  try { localStorage.setItem(OPSLAGSLEUTEL, JSON.stringify(c)); } catch (e) {}
+  if (serverModus) {
+    const r = await fetch("api/config", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(c, null, 2) });
+    if (!r.ok) throw new Error("Server kon config.json niet opslaan");
+  }
+}
+
+/* ===================== Geluid (zonder bestanden) ===================== */
+let audio = null;
+function ac() {
+  if (!config.geluid) return null;
+  try {
+    if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === "suspended") audio.resume();
+    return audio;
+  } catch (e) { return null; }
+}
+function toon(freq, start, duur, type = "triangle", volume = 0.18) {
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.value = freq;
+  const t = a.currentTime + start;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(volume, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + duur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + duur + 0.05);
+}
+function tik() {
+  const a = ac(); if (!a) return;
+  const len = Math.floor(a.sampleRate * 0.05);
+  const buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+  const s = a.createBufferSource(), g = a.createGain(), f = a.createBiquadFilter();
+  f.type = "bandpass"; f.frequency.value = 900 + Math.random() * 600;
+  g.gain.value = 0.5; s.buffer = buf; s.connect(f).connect(g).connect(a.destination); s.start();
+}
+function fanfare() { [[523, 0, .18], [659, .15, .18], [784, .3, .18], [1047, .45, .5]].forEach(([f, s, d]) => toon(f, s, d)); }
+function helaas() { [[392, 0, .25], [330, .22, .25], [262, .44, .5]].forEach(([f, s, d]) => toon(f, s, d, "sine")); }
+function eindsignaal() { [[784, 0, .3], [784, .3, .3], [880, .6, .3], [1047, .9, .9]].forEach(([f, s, d]) => toon(f, s, d, "square", .08)); }
+
+/* ===================== Dobbelsteen ===================== */
+const OGEN = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const EINDSTAND = { 1: [0, 0], 6: [0, 180], 3: [0, -90], 4: [0, 90], 2: [-90, 0], 5: [90, 0] };
+const kubus = $("kubus");
+for (let n = 1; n <= 6; n++) {
+  const v = document.createElement("div");
+  v.className = "vlak v" + n;
+  for (let i = 0; i < 9; i++) {
+    const o = document.createElement("div");
+    o.className = "oog" + (OGEN[n].includes(i) ? " aan" : "");
+    v.appendChild(o);
+  }
+  kubus.appendChild(v);
+}
+let draaiX = -20, draaiY = 25;
+function zetKubus(x, y, overgang) {
+  kubus.style.transition = `transform ${overgang}s cubic-bezier(.3,.7,.4,1)`;
+  kubus.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+}
+function landOp(ogen, overgang) {
+  const [ex, ey] = EINDSTAND[ogen];
+  // altijd een stukje doordraaien in dezelfde richting
+  const nx = ex + 360 * (Math.ceil((draaiX - ex) / 360) + 1);
+  const ny = ey + 360 * (Math.ceil((draaiY - ey) / 360) + 1);
+  draaiX = nx; draaiY = ny;
+  zetKubus(nx, ny, overgang);
+}
+
+/* ===================== Spelstatus ===================== */
+const spel = {
+  status: "klaar",       // klaar | loopt | pauze | voorbij
+  verstreken: 0,         // ms, opgebouwd tijdens pauzes
+  startMoment: 0,
+  rollend: false,
+  uitgezet: new Set(),   // taken die tijdens dit spel zijn uitgevinkt
+  laatsteTaak: null
+};
+const totaalMs = () => config.spelduurMinuten * 60000;
+function verstrekenMs() {
+  return spel.status === "loopt" ? spel.verstreken + (performance.now() - spel.startMoment) : spel.verstreken;
+}
+function minuut() { return verstrekenMs() / 60000; }
+
+function taakStatus(t) {
+  if (!t.actief) return "inactief";
+  if (spel.uitgezet.has(t.id)) return "uit";
+  const m = minuut();
+  if (m < t.beschikbaarVanaf) return "wacht";
+  if (t.beschikbaarTot !== null && m >= t.beschikbaarTot) return "verlopen";
+  return "beschikbaar";
+}
+const beschikbareTaken = () => config.taken.filter(t => taakStatus(t) === "beschikbaar" && t.tekst.trim());
+
+/* Wake lock: scherm niet laten slapen tijdens het spel */
+let wakeLock = null;
+async function houdWakker(aan) {
+  try {
+    if (aan && !wakeLock && navigator.wakeLock) {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+    } else if (!aan && wakeLock) { await wakeLock.release(); wakeLock = null; }
+  } catch (e) {}
+}
+
+function start() {
+  if (spel.status === "voorbij") return;
+  spel.status = "loopt"; spel.startMoment = performance.now();
+  houdWakker(true); toonStatus();
+}
+function pauzeer() {
+  if (spel.status !== "loopt") return;
+  spel.verstreken = verstrekenMs(); spel.status = "pauze";
+  houdWakker(false); toonStatus();
+}
+function nieuwSpel() {
+  spel.status = "klaar"; spel.verstreken = 0; spel.uitgezet.clear(); spel.laatsteTaak = null;
+  $("einde").classList.remove("open");
+  toonKaart("Welkom, lieve mensen!", "🎁", "Wie gooit er als eerste?", "Druk op de knop of op de dobbelsteen", null);
+  houdWakker(false); toonStatus(); tekenStrook();
+}
+function eindeSpel() {
+  spel.verstreken = totaalMs(); spel.status = "voorbij";
+  houdWakker(false); toonStatus(); eindsignaal();
+  if (!spel.rollend) $("einde").classList.add("open");
+}
+
+function toonStatus() {
+  const knop = $("startknop");
+  knop.textContent = spel.status === "loopt" ? "⏸ Pauze" : (spel.status === "pauze" ? "▶ Verder" : "▶ Start");
+  knop.disabled = spel.status === "voorbij";
+  $("gooiknop").disabled = spel.rollend || spel.status === "pauze" || spel.status === "voorbij";
+  $("timerstatus").textContent = ({
+    klaar: "Klaar om te beginnen", loopt: "Het spel is bezig", pauze: "Gepauzeerd", voorbij: "Het spel is voorbij"
+  })[spel.status];
+  const toetsen = config.toetsen.map(toetsNaam).join(" / ");
+  $("hint").textContent = spel.status === "pauze" ? "Spel staat op pauze"
+    : (toetsen ? `Tik op de dobbelsteen of druk op ${toetsen}` : "Tik op de dobbelsteen");
+}
+
+/* ===================== Gooien ===================== */
+function gooi() {
+  if (spel.rollend || $("config").classList.contains("open")) return;
+  if (spel.status === "voorbij") { melding("De tijd is om! Start een nieuw spel."); return; }
+  if (spel.status === "pauze") { melding("Het spel staat op pauze"); return; }
+  if (spel.status === "klaar") start();
+
+  spel.rollend = true; toonStatus();
+  $("uitzetten").style.display = "none";
+  toonKaart("De dobbelsteen rolt…", "🎲", "Spannend!", "Sinterklaas kijkt mee…", null, false);
+  const scene = $("scene"); scene.classList.add("springt");
+
+  const duur = config.dobbelDuurSeconden * 1000;
+  const begin = performance.now();
+  const stap = Math.min(380, Math.max(160, duur / 8));
+  const draai = () => {
+    draaiX += 90 + Math.random() * 270; draaiY += 90 + Math.random() * 270;
+    zetKubus(draaiX, draaiY, stap / 1000); tik();
+  };
+  draai();
+  const interval = setInterval(() => {
+    if (performance.now() - begin + stap >= duur) { clearInterval(interval); return; }
+    draai();
+  }, stap);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    scene.classList.remove("springt");
+    const uitkomst = bepaalUitkomst();
+    landOp(uitkomst.ogen, 0.7);
+    setTimeout(() => { spel.rollend = false; toonUitkomst(uitkomst); toonStatus(); }, 720);
+  }, duur);
+}
+
+function bepaalUitkomst() {
+  const beschikbaar = beschikbareTaken();
+  let ogen;
+  if (config.geenTaakGedrag === "opnieuw" && beschikbaar.length) {
+    const getallen = [...new Set(beschikbaar.map(t => t.ogen))];
+    ogen = getallen[Math.floor(Math.random() * getallen.length)];
+  } else {
+    ogen = 1 + Math.floor(Math.random() * 6);
+  }
+  const kandidaten = beschikbaar.filter(t => t.ogen === ogen);
+  const taak = kandidaten.length ? kandidaten[Math.floor(Math.random() * kandidaten.length)] : null;
+  return { ogen, taak, geenEnkele: beschikbaar.length === 0 };
+}
+
+function toonKaart(kop, emoji, tekst, sub, taak, animeer = true) {
+  $("kaartkop").textContent = kop;
+  $("kaartemoji").textContent = emoji;
+  $("kaarttekst").textContent = tekst;
+  $("kaartsub").textContent = sub;
+  const blok = $("uitzetten");
+  if (taak) {
+    blok.style.display = "flex";
+    $("uitzetvink").checked = spel.uitgezet.has(taak.id);
+  } else blok.style.display = "none";
+  if (animeer) { const k = $("kaart"); k.classList.remove("verschijn"); void k.offsetWidth; k.classList.add("verschijn"); }
+}
+
+function toonUitkomst(u) {
+  spel.laatsteTaak = u.taak;
+  if (u.taak) {
+    toonKaart(`Je gooide ${u.ogen}!`, u.taak.emoji || "🎁", u.taak.tekst, "Volgende speler is daarna aan de beurt", u.taak);
+    fanfare();
+  } else if (u.geenEnkele) {
+    toonKaart(`Je gooide ${u.ogen}`, "📜", "Er zijn geen taken meer beschikbaar", "Zet taken weer aan in de lijst hieronder of start een nieuw spel", null);
+    helaas();
+  } else {
+    toonKaart(`Je gooide ${u.ogen}`, "🙈", "Helaas, geen taak!", "De volgende speler is aan de beurt", null);
+    helaas();
+  }
+  tekenStrook();
+  if (spel.status === "voorbij") setTimeout(() => $("einde").classList.add("open"), 2500);
+}
+
+$("uitzetvink").addEventListener("change", (e) => {
+  e.target.blur();
+  const t = spel.laatsteTaak; if (!t) return;
+  if (e.target.checked) { spel.uitgezet.add(t.id); melding("Taak staat uit voor de rest van dit spel"); }
+  else { spel.uitgezet.delete(t.id); melding("Taak doet weer mee"); }
+  tekenStrook();
+});
+
+/* ===================== Takenstrook ===================== */
+let strookHandtekening = "";
+function tekenStrook(forceer = true) {
+  const items = config.taken.filter(t => t.actief && t.tekst.trim()).sort((a, b) => a.ogen - b.ogen);
+  const statussen = items.map(t => t.id + ":" + taakStatus(t)).join("|") + "|" + (spel.laatsteTaak && spel.laatsteTaak.id);
+  if (!forceer && statussen === strookHandtekening) return;
+  strookHandtekening = statussen;
+  const strook = $("strook"); strook.textContent = "";
+  for (const t of items) {
+    const st = taakStatus(t);
+    const chip = document.createElement("button");
+    chip.className = "chip " + st + (spel.laatsteTaak && spel.laatsteTaak.id === t.id ? " laatst" : "");
+    const ogen = document.createElement("span"); ogen.className = "ogen"; ogen.textContent = t.ogen;
+    const tekst = document.createElement("span"); tekst.textContent = (t.emoji ? t.emoji + " " : "") + t.tekst;
+    chip.append(ogen, tekst);
+    const extra = { uit: "uitgezet", wacht: `vanaf ${t.beschikbaarVanaf} min`, verlopen: "niet meer beschikbaar" }[st];
+    if (extra || (st === "beschikbaar" && t.beschikbaarTot !== null)) {
+      const s = document.createElement("span"); s.className = "status";
+      s.textContent = extra || `tot ${t.beschikbaarTot} min`;
+      chip.append(s);
+    }
+    chip.title = st === "uit" ? "Tik om weer aan te zetten" : "Tik om uit te zetten voor dit spel";
+    chip.addEventListener("click", () => {
+      chip.blur();
+      if (spel.uitgezet.has(t.id)) spel.uitgezet.delete(t.id); else spel.uitgezet.add(t.id);
+      if (spel.laatsteTaak && spel.laatsteTaak.id === t.id) $("uitzetvink").checked = spel.uitgezet.has(t.id);
+      tekenStrook();
+    });
+    strook.appendChild(chip);
+  }
+}
+
+/* ===================== Timerlus + gamepad ===================== */
+let vorigeKnoppen = false;
+function lus() {
+  const rest = totaalMs() - verstrekenMs();
+  if (spel.status === "loopt" && rest <= 0) eindeSpel();
+  const t = $("timer");
+  t.textContent = mmss(totaalMs() - verstrekenMs());
+  t.classList.toggle("laatste", spel.status === "loopt" && rest <= 60000);
+  $("timerbalk").firstElementChild.style.width = (Math.max(0, rest) / totaalMs() * 100) + "%";
+  tekenStrook(false);
+
+  if (config.gamepad && navigator.getGamepads) {
+    let ingedrukt = false;
+    for (const gp of navigator.getGamepads()) {
+      if (gp && gp.buttons.some(b => b.pressed)) { ingedrukt = true; break; }
+    }
+    if (ingedrukt && !vorigeKnoppen) gooi();
+    vorigeKnoppen = ingedrukt;
+  }
+  requestAnimationFrame(lus);
+}
+
+/* ===================== Bediening ===================== */
+let vangToets = false;
+document.addEventListener("keydown", (e) => {
+  const configOpen = $("config").classList.contains("open");
+  if (vangToets) {
+    e.preventDefault();
+    if (e.key !== "Escape" && !concept.toetsen.includes(e.key)) concept.toetsen.push(e.key);
+    vangToets = false; tekenToetsen(); return;
+  }
+  if (e.key === "F2") { e.preventDefault(); configOpen ? sluitConfig() : openConfig(); return; }
+  if (configOpen) { if (e.key === "Escape") sluitConfig(); return; }
+  if ($("einde").classList.contains("open") && (e.key === "Escape")) { $("einde").classList.remove("open"); return; }
+  if (config.toetsen.includes(e.key)) {
+    e.preventDefault();
+    if ($("einde").classList.contains("open")) return;
+    gooi();
+  }
+});
+$("gooiknop").addEventListener("click", (e) => { e.currentTarget.blur(); gooi(); });
+$("scene").addEventListener("click", gooi);
+$("startknop").addEventListener("click", (e) => { e.currentTarget.blur(); spel.status === "loopt" ? pauzeer() : start(); ac(); });
+$("nieuwknop").addEventListener("click", (e) => {
+  e.currentTarget.blur();
+  if (spel.status === "klaar" || confirm("Een nieuw spel starten? De tijd gaat terug en alle uitgezette taken doen weer mee.")) nieuwSpel();
+});
+$("eindnieuw").addEventListener("click", nieuwSpel);
+$("eindsluit").addEventListener("click", () => $("einde").classList.remove("open"));
+$("schermknop").addEventListener("click", (e) => {
+  e.currentTarget.blur();
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => melding("Volledig scherm niet toegestaan"));
+});
+$("configknop").addEventListener("click", (e) => { e.currentTarget.blur(); openConfig(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden && spel.status === "loopt") houdWakker(true); });
+
+/* ===================== Configscherm ===================== */
+let concept = null;
+
+function openConfig() {
+  concept = kopie(config);
+  $("opslaglabel").textContent = serverModus ? "Opslag: config.json (via server.py)" : "Opslag: deze browser";
+  $("c-status").textContent = "";
+  huidigeTab = "algemeen"; vulAlgemeen(); tekenTaken(); kiesTab("algemeen");
+  $("config").classList.add("open");
+}
+function sluitConfig() { $("config").classList.remove("open"); vangToets = false; }
+
+function vulAlgemeen() {
+  $("c-titel").value = concept.titel;
+  $("c-spelduur").value = concept.spelduurMinuten;
+  $("c-dobbelduur").value = concept.dobbelDuurSeconden;
+  $("c-geentaak").value = concept.geenTaakGedrag;
+  $("c-gamepad").checked = concept.gamepad;
+  $("c-geluid").checked = concept.geluid;
+  $("c-pepernoten").checked = concept.pepernotenregen;
+  tekenToetsen();
+}
+function leesAlgemeen() {
+  concept.titel = $("c-titel").value;
+  concept.spelduurMinuten = $("c-spelduur").value;
+  concept.dobbelDuurSeconden = $("c-dobbelduur").value;
+  concept.geenTaakGedrag = $("c-geentaak").value;
+  concept.gamepad = $("c-gamepad").checked;
+  concept.geluid = $("c-geluid").checked;
+  concept.pepernotenregen = $("c-pepernoten").checked;
+}
+function tekenToetsen() {
+  const box = $("c-toetsen"); box.textContent = "";
+  concept.toetsen.forEach((k, i) => {
+    const s = document.createElement("span"); s.className = "toets"; s.textContent = toetsNaam(k);
+    const x = document.createElement("button"); x.textContent = "×"; x.title = "Verwijderen";
+    x.addEventListener("click", () => { concept.toetsen.splice(i, 1); tekenToetsen(); });
+    s.appendChild(x); box.appendChild(s);
+  });
+  const b = document.createElement("button"); b.className = "cknop";
+  b.textContent = vangToets ? "Druk nu op een toets… (Esc = stoppen)" : "＋ Toets toevoegen";
+  b.addEventListener("click", () => { vangToets = true; b.blur(); tekenToetsen(); });
+  box.appendChild(b);
+}
+
+function tekenTaken() {
+  const body = $("c-taken"); body.textContent = "";
+  concept.taken.forEach((t, i) => {
+    const tr = document.createElement("tr");
+    const cel = (el) => { const td = document.createElement("td"); td.appendChild(el); tr.appendChild(td); return el; };
+
+    const ogen = document.createElement("select");
+    for (let n = 1; n <= 6; n++) { const o = document.createElement("option"); o.value = n; o.textContent = "⚀⚁⚂⚃⚄⚅"[n - 1] + " " + n; ogen.appendChild(o); }
+    ogen.value = t.ogen; ogen.addEventListener("change", () => t.ogen = Number(ogen.value)); cel(ogen);
+
+    const emoji = document.createElement("input"); emoji.type = "text"; emoji.className = "emoji"; emoji.value = t.emoji;
+    emoji.addEventListener("input", () => t.emoji = emoji.value); cel(emoji);
+
+    const tekst = document.createElement("input"); tekst.type = "text"; tekst.className = "tekst"; tekst.value = t.tekst;
+    tekst.placeholder = "Omschrijving van de taak"; tekst.addEventListener("input", () => t.tekst = tekst.value); cel(tekst);
+
+    const van = document.createElement("input"); van.type = "number"; van.min = 0; van.step = 0.5; van.value = t.beschikbaarVanaf;
+    van.addEventListener("input", () => t.beschikbaarVanaf = van.value); cel(van);
+
+    const tot = document.createElement("input"); tot.type = "number"; tot.min = 0; tot.step = 0.5; tot.placeholder = "einde";
+    tot.value = t.beschikbaarTot === null ? "" : t.beschikbaarTot;
+    tot.addEventListener("input", () => t.beschikbaarTot = tot.value === "" ? null : tot.value); cel(tot);
+
+    const actief = document.createElement("input"); actief.type = "checkbox"; actief.checked = t.actief;
+    actief.addEventListener("change", () => t.actief = actief.checked); cel(actief);
+
+    const weg = document.createElement("button"); weg.className = "cknop rood"; weg.textContent = "🗑"; weg.title = "Taak verwijderen";
+    weg.addEventListener("click", () => { concept.taken.splice(i, 1); tekenTaken(); }); cel(weg);
+
+    body.appendChild(tr);
+  });
+}
+
+let huidigeTab = "algemeen";
+function kiesTab(naam) {
+  if (huidigeTab === "algemeen" && naam !== "algemeen") leesAlgemeen();
+  huidigeTab = naam;
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("actief", b.dataset.tab === naam));
+  ["algemeen", "taken", "json"].forEach(n => $("tab-" + n).hidden = n !== naam);
+  if (naam === "json") { $("jsonveld").value = JSON.stringify(schoon(concept), null, 2); $("jsonfout").textContent = ""; }
+  if (naam === "algemeen") vulAlgemeen();
+}
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => kiesTab(b.dataset.tab)));
+
+$("c-taaktoevoegen").addEventListener("click", () => {
+  concept.taken.push({ id: nieuwId(), ogen: 1, emoji: "🎁", tekst: "", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true });
+  tekenTaken();
+  const velden = $("c-taken").querySelectorAll("input.tekst"); velden[velden.length - 1].focus();
+});
+$("c-jsontoepassen").addEventListener("click", () => {
+  try { concept = schoon(JSON.parse($("jsonveld").value)); $("jsonfout").textContent = "✔ Toegepast — vergeet niet op Opslaan te klikken"; vulAlgemeen(); tekenTaken(); }
+  catch (e) { $("jsonfout").textContent = "Fout in JSON: " + e.message; }
+});
+$("c-export").addEventListener("click", () => {
+  if (!$("tab-algemeen").hidden) leesAlgemeen();
+  const blob = new Blob([JSON.stringify(schoon(concept), null, 2)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "config.json";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+$("c-import").addEventListener("click", () => $("c-importbestand").click());
+$("c-importbestand").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    concept = schoon(JSON.parse(await f.text()));
+    vulAlgemeen(); tekenTaken(); kiesTab("taken");
+    $("c-status").textContent = `"${f.name}" geladen — klik op Opslaan om te gebruiken`;
+  } catch (err) { $("c-status").textContent = "Kon bestand niet lezen: " + err.message; }
+  e.target.value = "";
+});
+$("c-standaard").addEventListener("click", () => {
+  if (!confirm("Alle instellingen en taken terugzetten naar de standaard?")) return;
+  concept = kopie(STANDAARD); vulAlgemeen(); tekenTaken();
+  $("c-status").textContent = "Standaard teruggezet — klik op Opslaan om te bevestigen";
+});
+$("c-annuleer").addEventListener("click", sluitConfig);
+$("c-opslaan").addEventListener("click", async () => {
+  if (!$("tab-algemeen").hidden) leesAlgemeen();
+  if (!$("tab-json").hidden) {
+    try { concept = schoon(JSON.parse($("jsonveld").value)); }
+    catch (e) { $("jsonfout").textContent = "Fout in JSON: " + e.message; return; }
+  }
+  const nieuw = schoon(concept);
+  try {
+    await bewaarConfig(nieuw);
+    pasConfigToe(nieuw); sluitConfig(); melding("Instellingen opgeslagen 🎉");
+  } catch (e) { $("c-status").textContent = e.message; }
+});
+
+/* ===================== Toepassen ===================== */
+function maakPepernoten(aan) {
+  const box = $("pepernoten"); box.textContent = "";
+  if (!aan) return;
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement("div"); p.className = "pepernoot";
+    const maat = 10 + Math.random() * 16;
+    p.style.width = p.style.height = maat + "px";
+    p.style.left = (Math.random() * 100) + "vw";
+    p.style.animationDuration = (9 + Math.random() * 12) + "s";
+    p.style.animationDelay = (-Math.random() * 20) + "s";
+    box.appendChild(p);
+  }
+}
+function pasConfigToe(c) {
+  const oudeDuur = config.spelduurMinuten;
+  config = c;
+  $("titel").textContent = c.titel;
+  document.title = c.titel;
+  maakPepernoten(c.pepernotenregen);
+  if (oudeDuur !== c.spelduurMinuten && spel.status === "voorbij") spel.status = "pauze";
+  // taken die niet meer bestaan uit de sessie halen
+  const ids = new Set(c.taken.map(t => t.id));
+  for (const id of [...spel.uitgezet]) if (!ids.has(id)) spel.uitgezet.delete(id);
+  if (spel.laatsteTaak && !ids.has(spel.laatsteTaak.id)) spel.laatsteTaak = null;
+  toonStatus(); tekenStrook();
+}
+
+(async function init() {
+  pasConfigToe(await laadConfig());
+  requestAnimationFrame(lus);
+})();
+</script>
+</body>
+</html>

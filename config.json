@@ -1,0 +1,19 @@
+{
+  "titel": "Het Grote Sinterklaas Dobbelspel",
+  "spelduurMinuten": 15,
+  "dobbelDuurSeconden": 5,
+  "geenTaakGedrag": "opnieuw",
+  "geluid": true,
+  "pepernotenregen": true,
+  "gamepad": true,
+  "toetsen": [" ", "Enter"],
+  "taken": [
+    { "id": "t1", "ogen": 1, "emoji": "🎁", "tekst": "Pak een cadeau van de stapel", "beschikbaarVanaf": 0, "beschikbaarTot": null, "actief": true },
+    { "id": "t2", "ogen": 2, "emoji": "⬅️", "tekst": "Geef een cadeau door naar links", "beschikbaarVanaf": 0, "beschikbaarTot": null, "actief": true },
+    { "id": "t3", "ogen": 3, "emoji": "➡️", "tekst": "Geef een cadeau door naar rechts", "beschikbaarVanaf": 0, "beschikbaarTot": null, "actief": true },
+    { "id": "t4", "ogen": 4, "emoji": "🔄", "tekst": "Ruil een cadeau met iemand naar keuze", "beschikbaarVanaf": 0, "beschikbaarTot": null, "actief": true },
+    { "id": "t5", "ogen": 5, "emoji": "🎶", "tekst": "Zing een couplet van een Sinterklaasliedje", "beschikbaarVanaf": 0, "beschikbaarTot": null, "actief": true },
+    { "id": "t6", "ogen": 6, "emoji": "🎁", "tekst": "Pak een cadeau van de stapel en gooi nog een keer", "beschikbaarVanaf": 0, "beschikbaarTot": 5, "actief": true },
+    { "id": "t7", "ogen": 6, "emoji": "🕵️", "tekst": "Steel een cadeau van een andere speler", "beschikbaarVanaf": 5, "beschikbaarTot": null, "actief": true }
+  ]
+}
