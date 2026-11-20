@@ -1,6 +1,6 @@
 # 🎲 Sinterklaasspel
 
-Een virtueel Sinterklaas-dobbelspel voor de pakjesavond. Je gooit met een 3D-dobbelsteen en het aantal ogen bepaalt een taak, zoals "Pak een cadeau van de stapel" of "Steel een cadeau van een andere speler". Een grote timer laat zien hoeveel speeltijd er nog over is.
+Een virtueel Sinterklaas-dobbelspel voor de pakjesavond, met ook een **kerstmodus**. Je gooit met een 3D-dobbelsteen en het aantal ogen bepaalt een taak, zoals "Pak een cadeau van de stapel" of "Steel een cadeau van een andere speler". Een grote timer laat zien hoeveel speeltijd er nog over is.
 
 Het spel draait in de browser op **Windows** en op **Linux Mint**. Je hoeft niets te installeren, en het werkt ook zonder internet.
 
@@ -22,6 +22,12 @@ De startscripts starten ook `server.py` als Python aanwezig is (op Mint zit Pyth
 - **Timer:** de eerste worp start de klok. Met **Pauze** zet je de tijd stil, en met **Nieuw spel** begint alles opnieuw. In de laatste minuut gaat de timer knipperen.
 - **Taak uitzetten:** onder elke taak staat het vinkje *"Deze taak niet meer gebruiken in dit spel"*. Handig als bijvoorbeeld het laatste cadeau van de stapel al gepakt is. Onderin het scherm staat een strook met alle taken. Tik op een taak om hem uit of weer aan te zetten. Bij *Nieuw spel* doen alle taken weer mee.
 
+## 🎄 Kerstmodus
+
+Met de knop **🎄 Kerst** rechtsboven (of via ⚙ → *Thema*) schakel je over naar de kerstversie. Die heeft een groene achtergrond met sneeuw, knipperende kerstlichtjes, een kerstboom, groene ogen op de dobbelsteen, een eigen titel en eindtekst, en een Jingle Bells-deuntje bij elke taak. Met **🎁 Sint** ga je terug. De keuze wordt bewaard.
+
+Per taak bepaal je met **Thema** of hij meedoet bij Sinterklaas, bij Kerst of bij allebei. In de standaardset is het Sinterklaasliedje bij Kerst vervangen door een kerstliedje.
+
 ## Photobooth-hardware
 
 - Een **arcade-/buzzerknop** die zich als toetsenbord gedraagt, werkt direct (standaard Spatie of Enter). Andere toetsen leg je vast via ⚙ → *Toetsen om te gooien* → *Toets toevoegen*, waarna je de knop indrukt.
@@ -33,6 +39,7 @@ De startscripts starten ook `server.py` als Python aanwezig is (op Mint zit Pyth
 
 | Instelling | Standaard |
 |---|---|
+| Thema | Sinterklaas (of Kerst) |
 | Totale speltijd | 15 minuten |
 | Duur van het gooien | 5 seconden |
 | Gedrag als een getal geen taak heeft | alleen getallen gooien die nu een taak hebben |
@@ -41,12 +48,13 @@ De startscripts starten ook `server.py` als Python aanwezig is (op Mint zit Pyth
 ### Taken (`config.json`)
 
 ```json
-{ "id": "t7", "ogen": 6, "emoji": "🕵️", "tekst": "Steel een cadeau van een andere speler",
+{ "id": "t7", "ogen": 6, "thema": "beide", "emoji": "🕵️", "tekst": "Steel een cadeau van een andere speler",
   "beschikbaarVanaf": 5, "beschikbaarTot": null, "actief": true }
 ```
 
 - `ogen`: het aantal ogen (1–6) waar de taak bij hoort. Meerdere taken per getal mag; dan kiest het spel willekeurig één van de taken die op dat moment beschikbaar zijn.
 - `beschikbaarVanaf` / `beschikbaarTot`: het tijdvak waarin de taak meedoet, in minuten sinds de start. `null` betekent tot het einde. In de standaardset geeft een 6 de eerste 5 minuten "pak een cadeau en gooi nog eens", en daarna "steel een cadeau".
+- `thema`: `"beide"`, `"sinterklaas"` of `"kerst"`.
 - `actief`: met `false` doet de taak helemaal niet mee.
 
 Je bewerkt de taken in het tabblad **Taken**, of direct als JSON in het tabblad **JSON**.
