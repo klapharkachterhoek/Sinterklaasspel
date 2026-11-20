@@ -130,6 +130,8 @@
   /* ---------- Takenstrook ---------- */
   footer { min-height: 0; }
   #strooktitel { font-size: clamp(12px, 1.5vmin, 15px); opacity: .8; margin-bottom: 6px; }
+  #maker { text-align: center; font-size: clamp(12px, 1.7vmin, 17px); opacity: .8; margin-top: 8px; letter-spacing: .5px; }
+  #maker b { color: var(--goudlicht); font-weight: bold; }
   #strook { display: flex; gap: 8px; flex-wrap: wrap; max-height: 18vh; overflow: auto; }
   .chip { display: flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 12px 5px 6px;
     font-size: clamp(12px, 1.6vmin, 16px); border: 1px solid rgba(232,184,74,.7);
@@ -287,6 +289,7 @@
   <footer>
     <div id="strooktitel">Taken in dit spel — tik op een taak om hem uit of weer aan te zetten</div>
     <div id="strook"></div>
+    <div id="maker">Gemaakt door <b>Klaphark Achterhoek</b></div>
   </footer>
 </div>
 

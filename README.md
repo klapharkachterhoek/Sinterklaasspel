@@ -65,3 +65,7 @@ Je bewerkt de taken in het tabblad **Taken**, of direct als JSON in het tabblad 
 - `config.json`: de taken en instellingen
 - `server.py`: optionele lokale server (alleen de Python-standaardbibliotheek, luistert alleen op 127.0.0.1)
 - `start-windows.bat`, `start-linux.sh`: starten in kioskmodus
+
+---
+
+Gemaakt door **Klaphark Achterhoek**.
