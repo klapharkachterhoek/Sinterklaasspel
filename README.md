@@ -66,6 +66,14 @@ Je bewerkt de taken in het tabblad **Taken**, of direct als JSON in het tabblad 
 - `server.py`: optionele lokale server (alleen de Python-standaardbibliotheek, luistert alleen op 127.0.0.1)
 - `start-windows.bat`, `start-linux.sh`: starten in kioskmodus
 
+## Versies
+
+Het versienummer staat onderin het scherm achter "Gemaakt door Klaphark Achterhoek" (constante `VERSIE` in `index.html`). Opbouw: datum (`jjjjmmdd`) plus een volgnummer van twee cijfers.
+
+| Versie | Wijzigingen |
+|---|---|
+| 2026112301 | Alle taken passen nu altijd in beeld, ook op kleinere of lagere schermen: de takenstrook verkleint zichzelf als het nodig is, de dobbelsteen en de taakkaart schalen mee met de beschikbare ruimte, lange taakteksten worden kleiner gezet, en ook op een staand scherm past alles zonder scrollen. Versienummer toegevoegd. |
+
 ---
 
-Gemaakt door **Klaphark Achterhoek**.
+Gemaakt door **Klaphark Achterhoek** · versie 2026112301.

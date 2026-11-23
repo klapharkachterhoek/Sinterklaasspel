@@ -47,7 +47,7 @@
 
   /* ---------- Lay-out ---------- */
   #app { position: relative; z-index: 2; height: 100%; display: grid;
-    grid-template-rows: auto 1fr auto; padding: 22px 28px 20px; gap: 12px; }
+    grid-template-rows: auto minmax(0, 1fr) auto; padding: clamp(14px, 2.6vh, 22px) 28px clamp(12px, 2.2vh, 20px); gap: clamp(6px, 1.4vh, 12px); }
   header { display: flex; align-items: center; gap: 18px; }
   header .mijter { width: clamp(40px, 6vmin, 70px); flex: none; filter: drop-shadow(0 3px 4px rgba(0,0,0,.4)); }
   #titel { font-size: clamp(22px, 3.6vmin, 44px); margin: 0; color: var(--goudlicht);
@@ -74,9 +74,13 @@
   @keyframes knipper { 50% { opacity: .35; } }
 
   /* ---------- Speelveld ---------- */
-  main { display: grid; grid-template-columns: 1fr 1.2fr; gap: 28px; align-items: center; min-height: 0; }
-  #dobbelzone { display: flex; flex-direction: column; align-items: center; gap: clamp(20px, 5vmin, 56px); }
-  .scene { width: var(--dobbel); height: var(--dobbel); perspective: 900px; cursor: pointer; }
+  main { display: grid; grid-template-columns: 1fr 1.2fr; grid-template-rows: minmax(0, 1fr); gap: 28px; align-items: center; min-height: 0; }
+  /* De dobbelsteen schaalt mee met de ruimte die er echt is (container query units) */
+  #dobbelzone { container-type: size; height: 100%; min-height: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: clamp(6px, 5cqh, 56px);
+    --dobbel: clamp(50px, min(34cqh, 60cqw), 240px); }
+  .scene { width: var(--dobbel); height: var(--dobbel); flex: none; perspective: 900px; cursor: pointer; }
+  #dobbelzone > * { flex: none; }
   .scene.springt { animation: springen .45s ease-in-out infinite; }
   @keyframes springen { 50% { transform: translateY(calc(var(--dobbel) * -0.18)); } }
   .kubus { width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
@@ -100,41 +104,45 @@
   .schaduw { width: calc(var(--dobbel) * .9); height: 18px; margin-top: -10px; border-radius: 50%;
     background: radial-gradient(ellipse, rgba(0,0,0,.45), transparent 70%); }
 
-  #gooiknop { font-size: clamp(26px, 5vmin, 60px); padding: .35em 1.4em; }
+  #gooiknop { font-size: clamp(16px, min(5vmin, 8cqh), 60px); padding: .35em 1.4em; }
   #gooiknop:disabled { filter: grayscale(.7) brightness(.8); cursor: not-allowed; }
-  #hint { font-size: clamp(12px, 1.6vmin, 16px); opacity: .8; text-align: center; }
+  #hint { font-size: clamp(11px, min(1.6vmin, 2.6cqh), 16px); opacity: .8; text-align: center; }
 
   /* ---------- Resultaatkaart (perkament) ---------- */
   #kaart {
-    position: relative; color: #3b1d06; border-radius: 14px; min-height: 48vmin;
-    padding: clamp(20px, 4vmin, 48px);
+    position: relative; color: #3b1d06; border-radius: 14px; min-height: min(48vmin, 100%); max-height: 100%;
+    overflow: hidden; --kaartschaal: 1;
+    padding: clamp(12px, min(4vmin, 4vh), 48px);
     background:
       radial-gradient(circle at 20% 10%, rgba(255,255,255,.6), transparent 40%),
       linear-gradient(135deg, #fbf0d4, #ecd7a6 55%, #e1c58a);
     border: 3px solid var(--goud);
     box-shadow: 0 12px 30px rgba(0,0,0,.45), inset 0 0 40px rgba(122,74,35,.35);
-    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    display: flex; flex-direction: column; justify-content: safe center; align-items: center; text-align: center;
   }
   #kaart::after { content: var(--hoek, "🎁"); position: absolute; right: 14px; bottom: 6px; font-size: 26px; opacity: .35; }
-  #kaartkop { font-size: clamp(14px, 2vmin, 22px); letter-spacing: 2px; text-transform: uppercase; color: #8a1b16; font-weight: bold; }
-  #kaartemoji { font-size: clamp(56px, 13vmin, 150px); line-height: 1.1; margin: 1vmin 0; }
-  #kaarttekst { font-size: clamp(24px, 5vmin, 60px); font-weight: bold; line-height: 1.15; }
-  #kaartsub { font-size: clamp(14px, 2.1vmin, 22px); margin-top: 1.5vmin; opacity: .85; }
+  #kaartkop { font-size: calc(clamp(12px, min(2vmin, 2.4vh), 22px) * var(--kaartschaal)); letter-spacing: 2px; text-transform: uppercase; color: #8a1b16; font-weight: bold; }
+  #kaartemoji { font-size: calc(clamp(32px, min(13vmin, 14vh), 150px) * var(--kaartschaal)); line-height: 1.1; margin: 1vmin 0; }
+  #kaarttekst { font-size: calc(clamp(18px, min(5vmin, 6vh), 60px) * var(--kaartschaal)); font-weight: bold; line-height: 1.15; overflow-wrap: anywhere; }
+  #kaartsub { font-size: calc(clamp(12px, min(2.1vmin, 2.5vh), 22px) * var(--kaartschaal)); margin-top: 1.5vmin; opacity: .85; }
   #kaart.verschijn { animation: verschijn .55s cubic-bezier(.2,1.6,.4,1); }
   @keyframes verschijn { from { transform: scale(.6) rotate(-4deg); opacity: 0; } to { transform: none; opacity: 1; } }
-  #uitzetten { margin-top: 2.5vmin; display: none; align-items: center; gap: 12px;
+  #uitzetten { margin-top: 2.5vmin; display: none; align-items: center; gap: 12px; flex: none;
     background: rgba(255,255,255,.55); border: 2px dashed #b08a4a; border-radius: 10px;
-    padding: 10px 16px; font-size: clamp(14px, 2vmin, 22px); cursor: pointer; }
+    padding: .45em .8em; font-size: calc(clamp(12px, min(2vmin, 2.4vh), 22px) * var(--kaartschaal)); cursor: pointer; }
   #uitzetten input { width: clamp(20px, 3vmin, 32px); height: clamp(20px, 3vmin, 32px); accent-color: #a3131b; cursor: pointer; }
 
   /* ---------- Takenstrook ---------- */
   footer { min-height: 0; }
-  #strooktitel { font-size: clamp(12px, 1.5vmin, 15px); opacity: .8; margin-bottom: 6px; }
-  #maker { text-align: center; font-size: clamp(12px, 1.7vmin, 17px); opacity: .8; margin-top: 8px; letter-spacing: .5px; }
+  #strooktitel { font-size: clamp(11px, min(1.5vmin, 1.8vh), 15px); opacity: .8; margin-bottom: clamp(3px, .6vh, 6px); }
+  #maker { text-align: center; font-size: clamp(11px, min(1.7vmin, 2vh), 17px); opacity: .8; margin-top: clamp(4px, .8vh, 8px); letter-spacing: .5px; }
   #maker b { color: var(--goudlicht); font-weight: bold; }
-  #strook { display: flex; gap: 8px; flex-wrap: wrap; max-height: 18vh; overflow: auto; }
-  .chip { display: flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 12px 5px 6px;
-    font-size: clamp(12px, 1.6vmin, 16px); border: 1px solid rgba(232,184,74,.7);
+  #maker .versie { opacity: .75; }
+  /* Alle taken moeten altijd in beeld passen: de strook mag maximaal ~30% van het scherm
+     innemen; past het niet, dan verkleint pasStrookAan() de chips (--chipschaal). */
+  #strook { display: flex; gap: calc(8px * var(--chipschaal)); flex-wrap: wrap; max-height: 30vh; overflow: hidden; --chipschaal: 1; }
+  .chip { display: flex; align-items: center; gap: .4em; border-radius: 999px; padding: .3em .75em .3em .35em;
+    font-size: calc(clamp(11px, min(1.6vmin, 2vh), 16px) * var(--chipschaal)); border: 1px solid rgba(232,184,74,.7);
     background: rgba(0,0,0,.25); color: var(--creme); cursor: pointer; }
   .chip .ogen { background: var(--creme); color: var(--rood); border-radius: 50%; width: 1.7em; height: 1.7em;
     display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
@@ -223,12 +231,13 @@
   @keyframes twinkel { 50% { opacity: .3; transform: scale(.8); } }
   #eindtekst { white-space: pre-line; }
 
-  @media (max-width: 820px), (orientation: portrait) {
-    body { overflow: auto; }
-    #app { height: auto; min-height: 100%; }
-    main { grid-template-columns: 1fr; }
-    #kaart { min-height: 30vh; }
+  /* Smal of staand scherm: dobbelsteen boven, kaart eronder — nog steeds alles op één scherm */
+  @media (max-width: 560px), (orientation: portrait) {
+    main { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, 1.3fr); gap: clamp(8px, 2vh, 20px); }
+    #dobbelzone { --dobbel: clamp(40px, min(34cqh, 50cqw), 240px); gap: clamp(3px, 3cqh, 40px); }
+    #kaart { min-height: 0; height: 100%; }
     header { flex-wrap: wrap; }
+    #titel { flex-basis: 50%; }
     .veld { grid-template-columns: 1fr; }
   }
 </style>
@@ -289,7 +298,7 @@
   <footer>
     <div id="strooktitel">Taken in dit spel — tik op een taak om hem uit of weer aan te zetten</div>
     <div id="strook"></div>
-    <div id="maker">Gemaakt door <b>Klaphark Achterhoek</b></div>
+    <div id="maker">Gemaakt door <b>Klaphark Achterhoek</b> <span class="versie">· versie <span id="versie"></span></span></div>
   </footer>
 </div>
 
@@ -367,6 +376,9 @@ Veel plezier met jullie cadeaus!</p>
 
 <script>
 "use strict";
+
+const VERSIE = "2026112301";   // datum (jjjjmmdd) + volgnummer
+document.getElementById("versie").textContent = VERSIE;
 
 /* ===================== Standaardinstellingen ===================== */
 const STANDAARD = {
@@ -699,6 +711,7 @@ function toonKaart(kop, emoji, tekst, sub, taak, animeer = true) {
     blok.style.display = "flex";
     $("uitzetvink").checked = spel.uitgezet.has(taak.id);
   } else blok.style.display = "none";
+  pasKaartAan();
   if (animeer) { const k = $("kaart"); k.classList.remove("verschijn"); void k.offsetWidth; k.classList.add("verschijn"); }
 }
 
@@ -724,6 +737,24 @@ $("uitzetvink").addEventListener("change", (e) => {
   if (e.target.checked) { spel.uitgezet.add(t.id); melding("Taak staat uit voor de rest van dit spel"); }
   else { spel.uitgezet.delete(t.id); melding("Taak doet weer mee"); }
   tekenStrook();
+});
+
+/* ===================== Alles in beeld houden ===================== */
+/* Verklein een element (via een CSS-schaalvariabele) tot de inhoud past */
+function pasInhoudAan(el, variabele, minimum) {
+  let schaal = 1;
+  el.style.setProperty(variabele, schaal);
+  while (schaal > minimum && el.scrollHeight > el.clientHeight + 1) {
+    schaal = Math.round((schaal - 0.05) * 100) / 100;
+    el.style.setProperty(variabele, schaal);
+  }
+}
+const pasStrookAan = () => pasInhoudAan($("strook"), "--chipschaal", 0.5);
+const pasKaartAan = () => pasInhoudAan($("kaart"), "--kaartschaal", 0.4);
+let herschaalTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(herschaalTimer);
+  herschaalTimer = setTimeout(() => { pasStrookAan(); pasKaartAan(); }, 80);
 });
 
 /* ===================== Takenstrook ===================== */
@@ -756,6 +787,8 @@ function tekenStrook(forceer = true) {
     });
     strook.appendChild(chip);
   }
+  pasStrookAan();
+  pasKaartAan();   // de strook kan hoger/lager zijn geworden
 }
 
 /* ===================== Timerlus + gamepad ===================== */
