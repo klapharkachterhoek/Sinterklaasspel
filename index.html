@@ -377,7 +377,7 @@ Veel plezier met jullie cadeaus!</p>
 <script>
 "use strict";
 
-const VERSIE = "2026112303";   // datum (jjjjmmdd) + volgnummer
+const VERSIE = "2026112304";   // datum (jjjjmmdd) + volgnummer
 document.getElementById("versie").textContent = VERSIE;
 
 /* ===================== Standaardinstellingen ===================== */
@@ -392,14 +392,19 @@ const STANDAARD = {
   gamepad: true,
   toetsen: [" ", "Enter"],
   taken: [
-    { id: "t1", ogen: 1, emoji: "🎁", tekst: "Pak een cadeau van de stapel", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
-    { id: "t2", ogen: 2, emoji: "⬅️", tekst: "Geef een cadeau door naar links", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
-    { id: "t3", ogen: 3, emoji: "➡️", tekst: "Geef een cadeau door naar rechts", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
-    { id: "t4", ogen: 4, emoji: "🔄", tekst: "Ruil een cadeau met iemand naar keuze", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t1", ogen: 1, thema: "beide", emoji: "🎁", tekst: "Pak een cadeau van de stapel", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t2", ogen: 2, thema: "beide", emoji: "⬅️", tekst: "Geef een cadeau door naar links", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t3", ogen: 3, thema: "beide", emoji: "➡️", tekst: "Geef een cadeau door naar rechts", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
+    { id: "t4", ogen: 4, thema: "beide", emoji: "🔄", tekst: "Ruil een cadeau met iemand naar keuze", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
     { id: "t5", ogen: 5, thema: "sinterklaas", emoji: "🎶", tekst: "Zing een couplet van een Sinterklaasliedje", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
     { id: "t8", ogen: 5, thema: "kerst", emoji: "🎶", tekst: "Zing een couplet van een kerstliedje", beschikbaarVanaf: 0, beschikbaarTot: null, actief: true },
-    { id: "t6", ogen: 6, emoji: "🎁", tekst: "Pak een cadeau van de stapel en gooi nog een keer", beschikbaarVanaf: 0, beschikbaarTot: 5, actief: true },
-    { id: "t7", ogen: 6, emoji: "🕵️", tekst: "Steel een cadeau van een andere speler", beschikbaarVanaf: 5, beschikbaarTot: null, actief: true }
+    { id: "t6", ogen: 6, thema: "beide", emoji: "🎁", tekst: "Pak een cadeau van de stapel en gooi nog een keer", beschikbaarVanaf: 0, beschikbaarTot: 5, actief: true },
+    { id: "t7", ogen: 6, thema: "beide", emoji: "🕵️", tekst: "Steel een cadeau van een andere speler", beschikbaarVanaf: 5, beschikbaarTot: null, actief: true },
+    { id: "tmwtm46saetpf", ogen: 1, thema: "beide", emoji: "🎁", tekst: "Pak een cadeau uit", beschikbaarVanaf: 5, beschikbaarTot: null, actief: true },
+    { id: "tmwtm4xc9vn3h", ogen: 2, thema: "beide", emoji: "🎁", tekst: "Je mag een cadeau reserveren van je eigen stapel", beschikbaarVanaf: 5, beschikbaarTot: null, actief: true },
+    { id: "tmwtm60vqlyaz", ogen: 4, thema: "beide", emoji: "🎁", tekst: "Je mag een eigen cadeau opeten (eindigt als je weer aan de beurt bent)", beschikbaarVanaf: 5, beschikbaarTot: null, actief: true },
+    { id: "tmwtmb6z7m9pz", ogen: 3, thema: "beide", emoji: "🎁", tekst: "Pak een cadeau van de stapel", beschikbaarVanaf: 0, beschikbaarTot: 5, actief: true },
+    { id: "tmwtmq1mw7n2w", ogen: 5, thema: "beide", emoji: "🎁", tekst: "Zorg voor de catering!", beschikbaarVanaf: 0, beschikbaarTot: 5, actief: true }
   ]
 };
 const OPSLAGSLEUTEL = "sinterklaasspel.config.v1";
