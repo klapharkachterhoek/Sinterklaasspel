@@ -72,9 +72,10 @@ Het versienummer staat onderin het scherm achter "Gemaakt door Klaphark Achterho
 
 | Versie | Wijzigingen |
 |---|---|
+| 2026112303 | Nieuwe `config.json` met 13 taken, waaronder taken die pas na 5 minuten of alleen in de eerste 5 minuten meedoen. |
 | 2026112302 | Makersregel aangepast naar "Gemaakt door Klaphark Achterhoek voor Scoga.nl". |
 | 2026112301 | Alle taken passen nu altijd in beeld, ook op kleinere of lagere schermen: de takenstrook verkleint zichzelf als het nodig is, de dobbelsteen en de taakkaart schalen mee met de beschikbare ruimte, lange taakteksten worden kleiner gezet, en ook op een staand scherm past alles zonder scrollen. Versienummer toegevoegd. |
 
 ---
 
-Gemaakt door **Klaphark Achterhoek** voor **Scoga.nl** · versie 2026112302.
+Gemaakt door **Klaphark Achterhoek** voor **Scoga.nl** · versie 2026112303.
