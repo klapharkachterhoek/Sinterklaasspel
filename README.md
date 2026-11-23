@@ -68,12 +68,13 @@ Je bewerkt de taken in het tabblad **Taken**, of direct als JSON in het tabblad 
 
 ## Versies
 
-Het versienummer staat onderin het scherm achter "Gemaakt door Klaphark Achterhoek" (constante `VERSIE` in `index.html`). Opbouw: datum (`jjjjmmdd`) plus een volgnummer van twee cijfers.
+Het versienummer staat onderin het scherm achter "Gemaakt door Klaphark Achterhoek voor Scoga.nl" (constante `VERSIE` in `index.html`). Opbouw: datum (`jjjjmmdd`) plus een volgnummer van twee cijfers.
 
 | Versie | Wijzigingen |
 |---|---|
+| 2026112302 | Makersregel aangepast naar "Gemaakt door Klaphark Achterhoek voor Scoga.nl". |
 | 2026112301 | Alle taken passen nu altijd in beeld, ook op kleinere of lagere schermen: de takenstrook verkleint zichzelf als het nodig is, de dobbelsteen en de taakkaart schalen mee met de beschikbare ruimte, lange taakteksten worden kleiner gezet, en ook op een staand scherm past alles zonder scrollen. Versienummer toegevoegd. |
 
 ---
 
-Gemaakt door **Klaphark Achterhoek** · versie 2026112301.
+Gemaakt door **Klaphark Achterhoek** voor **Scoga.nl** · versie 2026112302.
